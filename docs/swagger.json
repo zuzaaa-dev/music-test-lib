@@ -1,0 +1,365 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/songs": {
+            "get": {
+                "description": "Возвращает список песен с возможностью фильтрации по всем полям (группа, название, дата выпуска, текст) и пагинацией.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Получить список песен",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название группы",
+                        "name": "group_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название песни",
+                        "name": "song_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дата релиза (формат: YYYY-MM-DD)",
+                        "name": "release_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Часть текста песни",
+                        "name": "lyrics",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список песен",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Song"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Добавляет новую песню в библиотеку и получает информацию о песне из внешнего API.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Добавить новую песню",
+                "parameters": [
+                    {
+                        "description": "Песня (группа и название)",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.AddSongRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Песня добавлена с детальной информацией",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Song"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные песни",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Не удалось добавить песню",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{id}": {
+            "get": {
+                "description": "Возвращает текст песни с возможностью пагинации по куплетам.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Получить текст песни",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер куплета",
+                        "name": "verse",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Текст песни",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID песни",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновляет информацию о песне, включая название группы, название песни, текст, дату релиза и ссылку.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Изменить данные песни",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Новая информация о песне",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateSongRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные песни обновлены",
+                        "schema": {
+                            "$ref": "#/definitions/v1.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные песни",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет песню по ее ID.",
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Удалить песню",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Песня удалена",
+                        "schema": {
+                            "$ref": "#/definitions/v1.SuccessResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Не удалось удалить песню",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.Song": {
+            "description": "Модель данных песни.",
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "example": "Muse"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://www.youtube.com/watch?v=Xsp3_a-PMTw"
+                },
+                "lyrics": {
+                    "type": "string",
+                    "example": "Ooh baby, don't you know I suffer? ..."
+                },
+                "release_date": {
+                    "type": "string",
+                    "example": "2006-07-16"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Supermassive Black Hole"
+                }
+            }
+        },
+        "v1.AddSongRequest": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "example": "Muse"
+                },
+                "song": {
+                    "type": "string",
+                    "example": "Supermassive Black Hole"
+                }
+            }
+        },
+        "v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Описание ошибки"
+                }
+            }
+        },
+        "v1.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Сообщение"
+                }
+            }
+        },
+        "v1.UpdateSongRequest": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "example": "Muse"
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://www.youtube.com/watch?v=Xsp3_a-PMTw"
+                },
+                "lyrics": {
+                    "type": "string",
+                    "example": "Ooh baby, don't you know I suffer? ..."
+                },
+                "release_date": {
+                    "type": "string",
+                    "example": "2006-07-16"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Supermassive Black Hole"
+                }
+            }
+        }
+    }
+}

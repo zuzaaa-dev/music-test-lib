@@ -1,0 +1,247 @@
+definitions:
+  domain.Song:
+    description: Модель данных песни.
+    properties:
+      group:
+        example: Muse
+        type: string
+      id:
+        example: "1"
+        type: string
+      link:
+        example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+        type: string
+      lyrics:
+        example: Ooh baby, don't you know I suffer? ...
+        type: string
+      release_date:
+        example: "2006-07-16"
+        type: string
+      title:
+        example: Supermassive Black Hole
+        type: string
+    type: object
+  v1.AddSongRequest:
+    properties:
+      group:
+        example: Muse
+        type: string
+      song:
+        example: Supermassive Black Hole
+        type: string
+    type: object
+  v1.ErrorResponse:
+    properties:
+      message:
+        example: Описание ошибки
+        type: string
+    type: object
+  v1.SuccessResponse:
+    properties:
+      message:
+        example: Сообщение
+        type: string
+    type: object
+  v1.UpdateSongRequest:
+    properties:
+      group:
+        example: Muse
+        type: string
+      link:
+        example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+        type: string
+      lyrics:
+        example: Ooh baby, don't you know I suffer? ...
+        type: string
+      release_date:
+        example: "2006-07-16"
+        type: string
+      title:
+        example: Supermassive Black Hole
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список песен с возможностью фильтрации по всем полям
+        (группа, название, дата выпуска, текст) и пагинацией.
+      parameters:
+      - description: Название группы
+        in: query
+        name: group_name
+        type: string
+      - description: Название песни
+        in: query
+        name: song_name
+        type: string
+      - description: 'Дата релиза (формат: YYYY-MM-DD)'
+        in: query
+        name: release_date
+        type: string
+      - description: Часть текста песни
+        in: query
+        name: lyrics
+        type: string
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Количество записей на странице
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список песен
+          schema:
+            items:
+              $ref: '#/definitions/domain.Song'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Получить список песен
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новую песню в библиотеку и получает информацию о песне
+        из внешнего API.
+      parameters:
+      - description: Песня (группа и название)
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/v1.AddSongRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Песня добавлена с детальной информацией
+          schema:
+            $ref: '#/definitions/domain.Song'
+        "400":
+          description: Некорректные данные песни
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Не удалось добавить песню
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Добавить новую песню
+      tags:
+      - songs
+  /songs/{id}:
+    delete:
+      description: Удаляет песню по ее ID.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Песня удалена
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "404":
+          description: Песня не найдена
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Не удалось удалить песню
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Удалить песню
+      tags:
+      - songs
+    get:
+      consumes:
+      - application/json
+      description: Возвращает текст песни с возможностью пагинации по куплетам.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Номер куплета
+        in: query
+        name: verse
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Текст песни
+          schema:
+            type: string
+        "400":
+          description: Некорректный ID песни
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Песня не найдена
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Получить текст песни
+      tags:
+      - songs
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о песне, включая название группы, название
+        песни, текст, дату релиза и ссылку.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новая информация о песне
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные песни обновлены
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Некорректные данные песни
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Песня не найдена
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Изменить данные песни
+      tags:
+      - songs
+swagger: "2.0"
